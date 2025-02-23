@@ -1,5 +1,3 @@
-from model.Pions import Pions
-from model.Plan import Plan
+from controler.logiques import Logiques
 
-pion = Pions("p1")
-plan = Plan()
+logique = Logiques()

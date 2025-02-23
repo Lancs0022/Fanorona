@@ -1,13 +1,12 @@
 class Pions :
     def __init__(self, nom) :
-        self.name = nom
-        self._position = None
+        self._name = nom
         print("Pions initiés !")
         
-    def getPosition(self):
-        return self._position
+    def getName(self):
+        return self._name
     
-    def setPosition(self, position):
-        self.position = _position
-
-    position = property(getPosition, setPosition)
+    def setName(self, name):
+        self.name = name
+        
+    property(getName, setName)
