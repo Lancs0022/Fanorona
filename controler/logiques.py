@@ -5,11 +5,18 @@ from model.Plan import Plan
 class Logiques:
     def __init__(self):
         self.initialiserPlan()
-        self.tour = random.choice(["Joueur", "IA"])
+        self.gameOver = False
+        self.joueur1 = "Joueur1"
+        self.joueur2 = "Joueur2"
+        self.compteurJ1 = 0
+        self.compteurJ2 = 0
+        self.tour_count = 0
+        self.setJ1vsJ2()
         print(self.terrainDeJeu.sommets)
         print("C'est au tour de/du : ", self.tour)
-        self.deplacerPion((2,0), (1,0))
-        self.deplacerPion((0,1), (1,1))
+        # Retirer les appels à deplacerPion pour éviter d'appeler aGagnee avant que self.vue soit initialisé
+        # self.deplacerPion((2,0), (1,0))
+        # self.deplacerPion((0,1), (1,1))
 
     def initialiserPlan(self):
         self.pionsAllies = [Pions(1), Pions(2), Pions(3)]
@@ -18,10 +25,23 @@ class Logiques:
         self.terrainDeJeu = Plan()
         for i in range(3):
             print(i)
-            self.terrainDeJeu.setSommet((0,i), self.pionsAllies[i].getName())
+            self.terrainDeJeu.setSommet((2,i), self.pionsAllies[i].getName())
         for i in range(3):
             print(i)
-            self.terrainDeJeu.setSommet((2,i), self.pionsAdverse[i].getName())
+            self.terrainDeJeu.setSommet((0,i), self.pionsAdverse[i].getName())
+            
+    def setJoueur1(self, nom):
+        self.joueur1 = nom
+    def setJoueur2(self, nom):
+        self.joueur2 = nom
+    def setJ1vsJ2(self):
+        self.joueur1 = "Joueur1"
+        self.joueur2 = "Joueur2"
+        self.tour = random.choice([self.joueur1, self.joueur2])
+    def setJ1vsIA(self):
+        self.joueur1 = "Joueur1"
+        self.joueur2 = "IA"
+        self.tour = random.choice([self.joueur1, self.joueur2])
 
     def mouvementEstPossible(self, posDepart, posArrivee):
         if posArrivee in self.terrainDeJeu.arets.get(posDepart, []) and self.terrainDeJeu.sommets[posArrivee[0], posArrivee[1]] == 0:
@@ -29,6 +49,9 @@ class Logiques:
         return False
 
     def deplacerPion(self, posDepart, posArrivee):
+        if self.gameOver :
+            print("Partie terminé")
+            return False
         print("Demande de déplacement du pion ", self.terrainDeJeu.sommets[posDepart[0], posDepart[1]], " de ", posDepart, " à ", posArrivee)
         
         if self.terrainDeJeu.sommets[posDepart[0], posDepart[1]] == 0:
@@ -41,13 +64,18 @@ class Logiques:
             print("Mouvement non autorisé")
             return False
         else:
-            if self.tour == "Joueur" and self.terrainDeJeu.sommets[posDepart[0], posDepart[1]] > 0 or self.tour == "IA" and self.terrainDeJeu.sommets[posDepart[0], posDepart[1]] < 0:
+            if self.tour == "Joueur1" and self.terrainDeJeu.sommets[posDepart[0], posDepart[1]] > 0 or ((self.tour == "IA" or self.tour == "Joueur2") and self.terrainDeJeu.sommets[posDepart[0], posDepart[1]] < 0):
                 self.terrainDeJeu.sommets[posArrivee[0], posArrivee[1]] = self.terrainDeJeu.sommets[posDepart[0], posDepart[1]]
                 self.terrainDeJeu.sommets[posDepart[0], posDepart[1]] = 0
-                self.tour = "IA" if self.tour == "Joueur" else "Joueur"
+                self.tour_count += 1
+                if self.tour == "Joueur1":
+                    self.compteurJ1 += 1
+                    self.tour = self.joueur2
+                elif self.tour == "Joueur2" or self.tour == "IA":
+                    self.compteurJ2 += 1
+                    self.tour = self.joueur1
                 print("Pion déplacé !")
-                if self.aGagnee():
-                    return "Victoire"
+                self.gameOver = self.aGagnee()
                 print("C'est au tour de/du : ", self.tour)
                 print(self.terrainDeJeu.sommets)
                 return True
@@ -59,11 +87,13 @@ class Logiques:
         # Victoire par position horizontale
         for i in range (3):
             if self.terrainDeJeu.sommets[i,0] > 0 and self.terrainDeJeu.sommets[i,1] > 0 and self.terrainDeJeu.sommets[i,2] > 0:
-                print("Le joueur a gagné !")
-                return True
+                if not (self.terrainDeJeu.sommets[2,0] == 1 and self.terrainDeJeu.sommets[2,1] == 2 and self.terrainDeJeu.sommets[2,2] == 3) or self.tour_count > 10:
+                    print("{} a gagné !".format(self.joueur1))
+                    return True
             elif self.terrainDeJeu.sommets[i,0] < 0 and self.terrainDeJeu.sommets[i,1] < 0 and self.terrainDeJeu.sommets[i,2] < 0:
-                print("L'IA a gagné !")
-                return True
+                if not (self.terrainDeJeu.sommets[0,0] == -1 and self.terrainDeJeu.sommets[0,1] == -2 and self.terrainDeJeu.sommets[0,2] == -3) or self.tour_count > 10:
+                    print("{} a gagné !".format(self.joueur2))
+                    return True
 
         # Victoire par position verticale
         for i in range (3):

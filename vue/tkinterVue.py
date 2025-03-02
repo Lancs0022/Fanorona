@@ -1,62 +1,62 @@
 import tkinter as tk
+from tkinter import messagebox
 
 class TkinterVue:
-    def __init__(self, sommets, aretes, on_click_callback):
+    def __init__(self, sommets, aretes, on_click_callback, nouveau_jeu_callback):
         self.fenPrincipal = tk.Tk()
         self.fenPrincipal.title("Fanorona :)")
         self.fenPrincipal.geometry("600x400")
         self.fenPrincipal.minsize(480, 240)
 
-        self.chargerMenu()
+        self.chargerMenu(nouveau_jeu_callback)
         self.connecterLesDonnees(sommets, aretes)
         self.creerFrames()
         self.fenPrincipal.bind("<Configure>", self.on_resize)
         self.canvas.bind("<Button-1>", on_click_callback)
-        self.run()
 
-    def chargerMenu(self):
-        # Create the menu bar
+    def chargerMenu(self, nouveau_jeu_callback):
+        # Crée la barre de menu
         self.menuBar = tk.Menu(self.fenPrincipal)
         
-        # Create the "Fichier" menu
+        # Crée le menu "Fichier"
         self.menuFichier = tk.Menu(self.menuBar, tearoff=0)
-        self.menuFichier.add_command(label="Nouveau")
+        self.menuFichier.add_command(label="Nouveau", command=nouveau_jeu_callback)
         self.menuFichier.add_command(label="Ouvrir")
         self.menuFichier.add_command(label="Enregistrer")
         self.menuFichier.add_separator()
         self.menuFichier.add_command(label="Quitter", command=self.fenPrincipal.quit)
         
-        # Create the "Édition" menu
+        # Crée le menu "Édition"
         self.menuEdition = tk.Menu(self.menuBar, tearoff=0)
         self.menuEdition.add_command(label="Annuler")
         self.menuEdition.add_command(label="Refaire")
         
-        # Create the "Aide" menu
+        # Crée le menu "Aide"
         self.menuAide = tk.Menu(self.menuBar, tearoff=0)
         self.menuAide.add_command(label="À propos")
         
-        # Add menus to the menu bar
+        # Ajoute les menus à la barre de menu
         self.menuBar.add_cascade(label="Fichier", menu=self.menuFichier)
         self.menuBar.add_cascade(label="Édition", menu=self.menuEdition)
         self.menuBar.add_cascade(label="Aide", menu=self.menuAide)
         
-        # Configure the menu bar
+        # Configure la fenêtre principale pour afficher la barre de menu
         self.fenPrincipal.config(menu=self.menuBar)
 
     def creerFrames(self):
-        # Create the top frame
+        # Crée le frame du haut
         self.frameHaut = tk.Frame(self.fenPrincipal, height=0.7*40)
         self.frameHaut.pack(fill=tk.X)
         
-        # Create the middle frame
+        # Crée le frame du milieu
         self.frameMilieu = tk.Frame(self.fenPrincipal, height=0.7*80)
         self.frameMilieu.pack(fill=tk.BOTH, expand=True)
         
-        # Create the bottom frame
+        # Crée le frame du bas
         self.frameBas = tk.Frame(self.fenPrincipal, height=0.7*40)
         self.frameBas.pack(fill=tk.X)
         
-        # Add labels to the top and bottom frames
+        # Ajoute des labels aux frames
         self.labelHaut = tk.Label(self.frameHaut, text="Informations du jeu")
         self.labelHaut.pack()
         
@@ -67,14 +67,17 @@ class TkinterVue:
         self.canvas = tk.Canvas(self.frameMilieu)
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
+    # Méthode pour dessiner un cercle
     def drawCircle(self, x, y, r=5, color="black"):
         # Draw a circle on the canvas
         self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=color)
 
+    # Méthode pour dessiner une ligne
     def drawLine(self, x1, y1, x2, y2, color="black"):
         # Draw a line on the canvas
         self.canvas.create_line(x1, y1, x2, y2, fill=color)
 
+    # Méthode pour dessiner les sommets
     def dessinerSommets(self):
         width = self.canvas.winfo_width()
         height = self.canvas.winfo_height()
@@ -90,6 +93,7 @@ class TkinterVue:
                 self.sommet_positions[(i, j)] = (x, y)
                 self.canvas.create_oval(x-5, y-5, x+5, y+5, fill="black")
 
+    # Méthode pour dessiner les arêtes
     def dessinerAretes(self):
         width = self.canvas.winfo_width()
         height = self.canvas.winfo_height()
@@ -105,6 +109,7 @@ class TkinterVue:
                 y2 = padding + y2 * cell_height
                 self.canvas.create_line(x1, y1, x2, y2, fill="black")
 
+    # Méthode pour dessiner les pions
     def dessinerPions(self):
         for (i, j), (x, y) in self.sommet_positions.items():
             pion = self.sommets[i, j]
@@ -118,6 +123,7 @@ class TkinterVue:
                 continue
             self.drawCircle(x, y, r, color)
 
+    # Méthode pour dessiner le terrain
     def dessinerTerrain(self):
         self.canvas.delete("all")
         self.dessinerAretes()
@@ -125,14 +131,24 @@ class TkinterVue:
         self.dessinerPions()
         print("Terrain dessiné !")
 
+    # Méthode pour connecter les données
     def connecterLesDonnees(self, sommets, aretes):
         # Connect the data to the view
         self.sommets = sommets
         self.aretes = aretes
 
+    # Méthode pour redimensionner le canvas à chaque modification d'état de la fenêtre
     def on_resize(self, event):
         self.dessinerTerrain()
 
+    # Méthode pour exécuter la boucle principale de Tkinter
     def run(self):
-        # Run the Tkinter main loop
+        # Run the Tkinter # Méthode pour lier l'événement de clic de souris
         self.fenPrincipal.mainloop()
+
+    # Méthode pour lier l'événement de clic de souris
+    def lierEvenementClic(self, on_click_callback):
+        self.canvas.bind("<Button-1>", on_click_callback)
+
+    def victoire(self, joueur):
+        messagebox.showinfo("Victoire", f"{joueur} a gagné !")
