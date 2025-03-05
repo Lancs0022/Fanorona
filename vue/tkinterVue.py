@@ -2,17 +2,16 @@ import tkinter as tk
 from tkinter import messagebox
 
 class TkinterVue:
-    def __init__(self, sommets, aretes, on_click_callback, nouveau_jeu_callback):
+    def __init__(self, on_click_callback):
         self.fenPrincipal = tk.Tk()
         self.fenPrincipal.title("Fanorona :)")
         self.fenPrincipal.geometry("600x400")
         self.fenPrincipal.minsize(480, 240)
 
-        self.chargerMenu(nouveau_jeu_callback)
-        self.connecterLesDonnees(sommets, aretes)
         self.creerFrames()
         self.fenPrincipal.bind("<Configure>", self.on_resize)
         self.canvas.bind("<Button-1>", on_click_callback)
+        self.pionSelectionne = None
 
     def chargerMenu(self, nouveau_jeu_callback):
         # Crée la barre de menu
@@ -57,8 +56,10 @@ class TkinterVue:
         self.frameBas.pack(fill=tk.X)
         
         # Ajoute des labels aux frames
-        self.labelHaut = tk.Label(self.frameHaut, text="Informations du jeu")
-        self.labelHaut.pack()
+        self.labelHautGauche = tk.Label(self.frameHaut, text="Informations du jeu")
+        self.labelHautDroite = tk.Label(self.frameHaut, text="Tour du joueur")
+        self.labelHautGauche.pack(side=tk.LEFT)
+        self.labelHautDroite.pack(side=tk.RIGHT)
         
         self.labelBas = tk.Label(self.frameBas, text="Statut du jeu")
         self.labelBas.pack()
@@ -66,16 +67,6 @@ class TkinterVue:
         # Create a canvas in the middle frame
         self.canvas = tk.Canvas(self.frameMilieu)
         self.canvas.pack(fill=tk.BOTH, expand=True)
-
-    # Méthode pour dessiner un cercle
-    def drawCircle(self, x, y, r=5, color="black"):
-        # Draw a circle on the canvas
-        self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=color)
-
-    # Méthode pour dessiner une ligne
-    def drawLine(self, x1, y1, x2, y2, color="black"):
-        # Draw a line on the canvas
-        self.canvas.create_line(x1, y1, x2, y2, fill=color)
 
     # Méthode pour dessiner les sommets
     def dessinerSommets(self):
@@ -113,7 +104,10 @@ class TkinterVue:
     def dessinerPions(self):
         for (i, j), (x, y) in self.sommet_positions.items():
             pion = self.sommets[i, j]
-            if pion > 0:
+            if self.pionSelectionne == (i, j):
+                color = "yellow"
+                r = 10
+            elif pion > 0:
                 color = "blue"
                 r = 10
             elif pion < 0:
@@ -132,10 +126,22 @@ class TkinterVue:
         print("Terrain dessiné !")
 
     # Méthode pour connecter les données
-    def connecterLesDonnees(self, sommets, aretes):
+    def connecterLesDonnees(self, sommets, aretes, joueur1, joueur2):
         # Connect the data to the view
+        self.joueur1 = joueur1
+        self.joueur2 = joueur2
+        self.labelHautGauche["text"] = f"{joueur1} vs {joueur2}"
+        # self.labelHautGauche["fg"] = "blue" if joueur1 == "Joueur1" else "red"
         self.sommets = sommets
         self.aretes = aretes
+        
+    def actualiserTour(self, tour):
+        self.labelHautDroite["text"] = f"Tour du joueur : {tour}"
+        self.labelHautDroite["fg"] = "blue" if tour == "Joueur1" else "red"
+
+    # Méthode pour actualiser les informations du jeu
+    def actualiserInfosJeu(self, infos):
+        self.labelHaut["text"] = infos
 
     # Méthode pour redimensionner le canvas à chaque modification d'état de la fenêtre
     def on_resize(self, event):
@@ -152,3 +158,21 @@ class TkinterVue:
 
     def victoire(self, joueur):
         messagebox.showinfo("Victoire", f"{joueur} a gagné !")
+
+    # Méthode pour dessiner un cercle
+    def drawCircle(self, x, y, r=5, color="black"):
+        # Draw a circle on the canvas
+        self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=color)
+
+    # Méthode pour dessiner une ligne
+    def drawLine(self, x1, y1, x2, y2, color="black"):
+        # Draw a line on the canvas
+        self.canvas.create_line(x1, y1, x2, y2, fill=color)
+
+    # Méthode pour afficher un message d'erreur
+    def afficherErreur(self, message):
+        messagebox.showerror("Erreur", message)
+        
+    # Selection d'un pion
+    def selectionnerPion(self, i, j):
+        self.pionSelectionne = (i, j)

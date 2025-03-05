@@ -49,20 +49,16 @@ class Logiques:
         return False
 
     def deplacerPion(self, posDepart, posArrivee):
-        if self.gameOver :
-            print("Partie terminé")
-            return False
+        if self.gameOver:
+            return "Partie terminée"
         print("Demande de déplacement du pion ", self.terrainDeJeu.sommets[posDepart[0], posDepart[1]], " de ", posDepart, " à ", posArrivee)
         
         if self.terrainDeJeu.sommets[posDepart[0], posDepart[1]] == 0:
-            print("Pas de pion à cette position")
-            return False
+            return "Pas de pion à cette position"
         elif self.terrainDeJeu.sommets[posArrivee[0], posArrivee[1]] != 0:
-            print("Position d'arrivée déjà occupée")
-            return False
+            return "Position d'arrivée déjà occupée"
         elif not self.mouvementEstPossible(posDepart, posArrivee):
-            print("Mouvement non autorisé")
-            return False
+            return "Mouvement non autorisé"
         else:
             if self.tour == "Joueur1" and self.terrainDeJeu.sommets[posDepart[0], posDepart[1]] > 0 or ((self.tour == "IA" or self.tour == "Joueur2") and self.terrainDeJeu.sommets[posDepart[0], posDepart[1]] < 0):
                 self.terrainDeJeu.sommets[posArrivee[0], posArrivee[1]] = self.terrainDeJeu.sommets[posDepart[0], posDepart[1]]
@@ -75,47 +71,46 @@ class Logiques:
                     self.compteurJ2 += 1
                     self.tour = self.joueur1
                 print("Pion déplacé !")
-                self.gameOver = self.aGagnee()
+                # self.aGagnee()
                 print("C'est au tour de/du : ", self.tour)
                 print(self.terrainDeJeu.sommets)
                 return True
             else:
-                print("Ce n'est pas votre tour")
-                return False
+                return "Ce n'est pas votre tour"
 
     def aGagnee(self):
         # Victoire par position horizontale
         for i in range (3):
             if self.terrainDeJeu.sommets[i,0] > 0 and self.terrainDeJeu.sommets[i,1] > 0 and self.terrainDeJeu.sommets[i,2] > 0:
                 if not (self.terrainDeJeu.sommets[2,0] == 1 and self.terrainDeJeu.sommets[2,1] == 2 and self.terrainDeJeu.sommets[2,2] == 3) or self.tour_count > 10:
-                    print("{} a gagné !".format(self.joueur1))
-                    return True
+                    return self.quiGagne(self.joueur1)
             elif self.terrainDeJeu.sommets[i,0] < 0 and self.terrainDeJeu.sommets[i,1] < 0 and self.terrainDeJeu.sommets[i,2] < 0:
                 if not (self.terrainDeJeu.sommets[0,0] == -1 and self.terrainDeJeu.sommets[0,1] == -2 and self.terrainDeJeu.sommets[0,2] == -3) or self.tour_count > 10:
-                    print("{} a gagné !".format(self.joueur2))
-                    return True
+                    return self.quiGagne(self.joueur2)
 
         # Victoire par position verticale
         for i in range (3):
             if self.terrainDeJeu.sommets[0,i] > 0 and self.terrainDeJeu.sommets[1,i] > 0 and self.terrainDeJeu.sommets[2,i] > 0:
-                print("Le joueur a gagné !")
-                return True
+                return self.quiGagne(self.joueur1)
             elif self.terrainDeJeu.sommets[0,i] < 0 and self.terrainDeJeu.sommets[1,i] < 0 and self.terrainDeJeu.sommets[2,i] < 0:
-                print("L'IA a gagné !")
-                return True
+                return self.quiGagne(self.joueur2)
 
         # Victoire par position diagonale
         if self.terrainDeJeu.sommets[0,0] > 0 and self.terrainDeJeu.sommets[1,1] > 0 and self.terrainDeJeu.sommets[2,2] > 0:
-            print("Le joueur a gagné !")
-            return True
+            return self.quiGagne(self.joueur1)
         elif self.terrainDeJeu.sommets[0,0] < 0 and self.terrainDeJeu.sommets[1,1] < 0 and self.terrainDeJeu.sommets[2,2] < 0:
-            print("L'IA a gagné !")
-            return True
+            return self.quiGagne(self.joueur2)
         elif self.terrainDeJeu.sommets[0,2] > 0 and self.terrainDeJeu.sommets[1,1] > 0 and self.terrainDeJeu.sommets[2,0] > 0:
-            print("Le joueur a gagné !")
-            return True
+            return self.quiGagne(self.joueur1)
         elif self.terrainDeJeu.sommets[0,2] < 0 and self.terrainDeJeu.sommets[1,1] < 0 and self.terrainDeJeu.sommets[2,0] < 0:
-            print("L'IA a gagné !")
-            return True
+            return self.quiGagne(self.joueur2)
 
-        return False
+        return 0
+    
+    def quiGagne(self, joueur):
+        print("{} a gagné !".format(joueur))
+        self.gameOver = True
+        if joueur == "Joueur1":
+            return 1
+        elif joueur == "Joueur2" or joueur == "IA":
+            return 2

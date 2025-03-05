@@ -1,17 +1,16 @@
 # Fanorona
 
-## Fanorona
+## About
 
-En guise d'entrainement sur le langage Python,
-j'ai décidé de recréer le jeu Fanorona pour bien appréhender le langage en détail et juste pour le fun
+This is a little game i'm developping to train myself on python.
 
-## Fonctionnalités
+## Fonctionnalities
 
-- Interface utilisateur graphique tkinter   (Terminé)
-- Mode de jeu multijoueur local             (En cours)
+- Graphical interface with tkinter          (Finished)
+- Local multiplayer                         (Finished)
 
 ## Extensions
 
-- Mode de jeu solo contre une IA            (Prochainement)
-- Mode de jeu IA vs IA                      (Prochainement)
-- Mode multijoueur en ligne                 (Prochainement)
+- Solo mode against AI                      (Prochainement)
+- AI Vs AI mode cause why not               (Prochainement)
+- Online Player vs Player mode              (Prochainement)
