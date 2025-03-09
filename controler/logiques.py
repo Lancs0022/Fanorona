@@ -12,7 +12,7 @@ class Logiques:
         self.compteurJ2 = 0
         self.tour_count = 0
         self.setJ1vsJ2()
-        print(self.terrainDeJeu.sommets)
+        print(self.terrainDeJeu.getSommet())
         print("C'est au tour de/du : ", self.tour)
         # Retirer les appels à deplacerPion pour éviter d'appeler aGagnee avant que self.vue soit initialisé
         # self.deplacerPion((2,0), (1,0))

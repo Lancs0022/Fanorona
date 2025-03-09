@@ -13,15 +13,16 @@ class TkinterVue:
         self.canvas.bind("<Button-1>", on_click_callback)
         self.pionSelectionne = None
 
-    def chargerMenu(self, nouveau_jeu_callback):
+    def chargerMenu(self, nouveauJeuCallback, sauvegardeCallback, chargementPartieCallback):
         # Crée la barre de menu
         self.menuBar = tk.Menu(self.fenPrincipal)
         
         # Crée le menu "Fichier"
         self.menuFichier = tk.Menu(self.menuBar, tearoff=0)
-        self.menuFichier.add_command(label="Nouveau", command=nouveau_jeu_callback)
+        self.menuFichier.add_command(label="Nouveau", command=nouveauJeuCallback)
         self.menuFichier.add_command(label="Ouvrir")
-        self.menuFichier.add_command(label="Enregistrer")
+        self.menuFichier.add_command(label="Sauvegarder", command=sauvegardeCallback)
+        self.menuFichier.add_command(label="Charger", command=chargementPartieCallback)
         self.menuFichier.add_separator()
         self.menuFichier.add_command(label="Quitter", command=self.fenPrincipal.quit)
         
@@ -134,7 +135,11 @@ class TkinterVue:
         # self.labelHautGauche["fg"] = "blue" if joueur1 == "Joueur1" else "red"
         self.sommets = sommets
         self.aretes = aretes
-        
+
+    def actualiserSommets(self, sommets):
+        self.sommets = sommets
+        self.dessinerTerrain()
+
     def actualiserTour(self, tour):
         self.labelHautDroite["text"] = f"Tour du joueur : {tour}"
         self.labelHautDroite["fg"] = "blue" if tour == "Joueur1" else "red"

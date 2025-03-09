@@ -18,6 +18,9 @@ class Plan:
 
     def setSommet(self, position, valeur):
         self._sommets[position[0], position[1]] = valeur
+        
+    def copieSommets(self, copieSommets):
+        self._sommets = copieSommets
     
     def getSommet(self):
         return self._sommets

@@ -2,6 +2,8 @@ from functools import partial
 from vue.TkinterVue import TkinterVue as tkVue
 from controler.logiques import Logiques
 from controler.Tracer import Tracer
+import ast
+import numpy as np
 
 class TkinterApi(Logiques):
     def __init__(self):
@@ -11,7 +13,7 @@ class TkinterApi(Logiques):
         self.vue = tkVue(partial(self.on_click))
         self.vue.connecterLesDonnees(self.terrainDeJeu.sommets, self.terrainDeJeu.arets, self.joueur1, self.joueur2)
         self.vue.actualiserTour(self.tour)
-        self.vue.chargerMenu(self.nouveauJeu)
+        self.vue.chargerMenu(self.nouveauJeu, self.sauvegarderLaPartie, self.chargerPartie)
         self.vue.dessinerTerrain()
         self.vue.lierEvenementClic(partial(self.on_click))
         self.vue.run()
@@ -78,11 +80,71 @@ class TkinterApi(Logiques):
         return 0
 
     def nouveauJeu(self):
+        self.tour_count = 0
+        self.compteurJ1 = 0
+        self.compteurJ2 = 0
         self.initialiserPlan()
         self.gameOver = False
         self.tracer.log("Nouveau jeu")
         self.vue.connecterLesDonnees(self.terrainDeJeu.sommets, self.terrainDeJeu.arets, self.joueur1, self.joueur2)
         self.vue.dessinerTerrain()
+        
+    def sauvegarderLaPartie(self):
+        if self.gameOver:
+            self.vue.afficherErreur("Partie terminée, impossible de sauvegarder.")
+            return
+        game_state = [
+            f"Tour: {self.tour}",
+            f"Joueur1: {self.joueur1}",
+            f"Joueur2: {self.joueur2}",
+            f"Sommets: {self.terrainDeJeu.sommets.tolist()}"
+        ]
+        self.tracer.save_game(game_state)
+
+    def chargerPartie(self):
+        try:
+            self.gameOver = False
+            print("Avant le chargement de la partie...")
+            print("Sommets: ", self.terrainDeJeu.sommets)
+            print("Le type de sommets: ", type(self.terrainDeJeu.sommets))
+            print("Tour: ", self.tour)
+            print("Joueur1: ", self.joueur1)
+            print("Joueur2: ", self.joueur2)
+            print("Tour count: ", self.tour_count)
+            print("Compteur J1: ", self.compteurJ1)
+            print("Compteur J2: ", self.compteurJ2)
+            print("Chargement de la partie...")
+            with open(self.tracer.save_filename, 'r') as file:
+                lines = file.readlines()
+            
+            if len(lines) < 4:
+                raise ValueError("Fichier de sauvegarde corrompu ou incomplet.")
+            
+            self.tour = lines[0].strip().split(": ")[1]
+            self.joueur1 = lines[1].strip().split(": ")[1]
+            self.joueur2 = lines[2].strip().split(": ")[1]
+            
+            # Combine all lines after "Sommets: " into a single string
+            sommets_str = "".join(lines[3:6]).strip().split(": ", 1)[1]
+            self.terrainDeJeu.copieSommets(np.array(ast.literal_eval(sommets_str)))
+            print("Les données ont été chargées avec succès !")
+            print("Sommets: ", self.terrainDeJeu.sommets)
+            print("Le type de sommets: ", type(self.terrainDeJeu.sommets))
+            print("Tour: ", self.tour)
+            print("Joueur1: ", self.joueur1)
+            print("Joueur2: ", self.joueur2)
+            print("Tour count: ", self.tour_count)
+            print("Compteur J1: ", self.compteurJ1)
+            print("Compteur J2: ", self.compteurJ2)
+            # Code commenté
+            # self.terrainDeJeu.arets = ast.literal_eval(lines[6].strip().split(": ", 1)[1])
+            # self.vue.connecterLesDonnees(self.terrainDeJeu.sommets, self.terrainDeJeu.arets, self.joueur1, self.joueur2)
+            
+            self.vue.actualiserTour(self.tour)
+            self.vue.actualiserSommets(self.terrainDeJeu.sommets)
+        
+        except (FileNotFoundError, ValueError, SyntaxError) as e:
+            self.vue.afficherErreur(f"Erreur de chargement: {str(e)}")
         
     def actualiserInformations(self):
         self.vue.actualiserInformations(self.joueur1, self.joueur2, self.tour_count)
