@@ -141,8 +141,8 @@ class TkinterVue:
         self.dessinerTerrain()
 
     def actualiserTour(self, tour):
-        self.labelHautDroite["text"] = f"Tour du joueur : {tour}"
-        self.labelHautDroite["fg"] = "blue" if tour == "Joueur1" else "red"
+        self.labelHautDroite["text"] = f"Tour du joueur : {tour.nom}"
+        self.labelHautDroite["fg"] = "blue" if tour.nom == "Joueur1" else "red"
 
     # Méthode pour actualiser les informations du jeu
     def actualiserInfosJeu(self, infos):

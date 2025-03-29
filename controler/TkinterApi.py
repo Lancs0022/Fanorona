@@ -11,7 +11,7 @@ class TkinterApi(Logiques):
         self.selected_pion = None
         self.tracer = Tracer()
         self.vue = tkVue(partial(self.on_click))
-        self.vue.connecterLesDonnees(self.terrainDeJeu.sommets, self.terrainDeJeu.arets, self.joueur1, self.joueur2)
+        self.vue.connecterLesDonnees(self.terrainDeJeu.sommets, self.terrainDeJeu.arets, self.joueur1.nom, self.joueur2.nom)
         self.vue.actualiserTour(self.tour)
         self.vue.chargerMenu(self.nouveauJeu, self.sauvegarderLaPartie, self.chargerPartie)
         self.vue.dessinerTerrain()
@@ -29,6 +29,11 @@ class TkinterApi(Logiques):
                     self.vue.selectionnerPion(None, None)
                     if result is True:
                         self.vue.actualiserTour(self.tour)
+                        if(self.tour == "IA1" or self.tour == "IA2"):
+                            self.actualiserInformations()
+                            self.vue.dessinerTerrain()
+                            self.aGagnee()
+                            return
                     else:
                         self.vue.afficherErreur(result)
                     self.vue.dessinerTerrain()
@@ -86,17 +91,19 @@ class TkinterApi(Logiques):
         self.initialiserPlan()
         self.gameOver = False
         self.tracer.log("Nouveau jeu")
-        self.vue.connecterLesDonnees(self.terrainDeJeu.sommets, self.terrainDeJeu.arets, self.joueur1, self.joueur2)
+        self.vue.connecterLesDonnees(self.terrainDeJeu.sommets, self.terrainDeJeu.arets, self.joueur1.nom, self.joueur2.nom)
         self.vue.dessinerTerrain()
-        
+
     def sauvegarderLaPartie(self):
         if self.gameOver:
             self.vue.afficherErreur("Partie terminée, impossible de sauvegarder.")
             return
         game_state = [
-            f"Tour: {self.tour}",
-            f"Joueur1: {self.joueur1}",
-            f"Joueur2: {self.joueur2}",
+            f"Tour: {self.tour.nom}",
+            f"Joueur1: {self.joueur1.nom}",
+            f"Side J1: {self.joueur1.side}",
+            f"Joueur2: {self.joueur2.nom}",
+            f"Side J2: {self.joueur2.side}",
             f"Sommets: {self.terrainDeJeu.sommets.tolist()}"
         ]
         self.tracer.save_game(game_state)
@@ -120,9 +127,9 @@ class TkinterApi(Logiques):
             if len(lines) < 4:
                 raise ValueError("Fichier de sauvegarde corrompu ou incomplet.")
             
-            self.tour = lines[0].strip().split(": ")[1]
-            self.joueur1 = lines[1].strip().split(": ")[1]
-            self.joueur2 = lines[2].strip().split(": ")[1]
+            self.tour = next(j for j in [self.joueur1, self.joueur2] if j.nom == lines[0].strip().split(": ")[1])
+            self.joueur1.nom = lines[1].strip().split(": ")[1]
+            self.joueur2.nom = lines[2].strip().split(": ")[1]
             
             # Combine all lines after "Sommets: " into a single string
             sommets_str = "".join(lines[3:6]).strip().split(": ", 1)[1]
@@ -147,4 +154,4 @@ class TkinterApi(Logiques):
             self.vue.afficherErreur(f"Erreur de chargement: {str(e)}")
         
     def actualiserInformations(self):
-        self.vue.actualiserInformations(self.joueur1, self.joueur2, self.tour_count)
+        self.vue.actualiserInformations(self.joueur1.nom, self.joueur2.nom, self.tour_count)
